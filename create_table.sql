@@ -7,4 +7,4 @@ CREATE EXTERNAL TABLE IF NOT EXISTS cidrblocks (
 )
 ROW FORMAT serde 'org.openx.data.jsonserde.JsonSerDe'
 with serdeproperties ( 'paths'='accountid, accountname, cidrblock, region, vpcid' )
-LOCATION 's3://vpc-data-29fhlek/cidrrunner';
+LOCATION 's3://vpc-data-myorg/cidrrunner';
