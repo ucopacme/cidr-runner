@@ -1,0 +1,11 @@
+# Sample cidr_runner spec file for 'myorg'
+---
+regions:
+- us-west-2
+- us-east-1
+accounts:
+- account01
+- account02
+- account03
+bucket_name: vpc-data-myorg
+object_path: cidrrunner
