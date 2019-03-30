@@ -9,9 +9,9 @@ import boto3
 from botocore.exceptions import ClientError
 import click
 
-import organizer
-from organizer.utils import jsonfmt, yamlfmt
-from organizer.cli.utils import (
+import orgcrawler
+from orgcrawler.utils import jsonfmt, yamlfmt
+from orgcrawler.cli.utils import (
     setup_crawler,
     format_responses,
 )
