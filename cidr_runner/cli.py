@@ -15,9 +15,10 @@ from orgcrawler.cli.utils import (
     setup_crawler,
     format_responses,
 )
-from .payloads import (
+from payload import (
     collect_vpc_data,
 )
+import util
 
 
 @click.command(context_settings=dict(help_option_names=['-h', '--help']))
@@ -93,33 +94,9 @@ def main(master_role, spec_file):
             CreateBucketConfiguration = {'LocationConstraint':'us-west-2'}
         )
         s3.Object(bucket, obj).put(Body=text_stream.getvalue())
-    #botocore.errorfactory.NoSuchBucket: An error occurred (NoSuchBucket) when calling the PutObject operation: The specified bucket does not exist
 
-
-    ## Another way to do it
-    #
-    #s3_client = boto3.client('s3')
-    #try:
-    #    s3_client.create_bucket(
-    #        ACL = 'private',
-    #        Bucket = spec['bucket_name'],
-    #        CreateBucketConfiguration = {'LocationConstraint':'us-west-2'}
-    #    )
-    #except s3_client.exceptions.BucketAlreadyOwnedByYou as e:
-    #    pass
-    #s3_client.put_object(
-    #    Bucket = spec['bucket_name'],
-    #    Key = 'cidr_blocks.json',
-    #    Body = text_stream.getvalue(),
-    #)
-    #botocore.errorfactory.BucketAlreadyOwnedByYou: An error occurred (BucketAlreadyOwnedByYou) when calling the CreateBucket operation: Your previous request to create the named bucket succeeded and you already own it.
-
-
-
-
-    """
-https://stackoverflow.com/questions/31031463/can-you-upload-to-s3-using-a-stream-rather-than-a-local-file/35269210
-    """
 
 if __name__ == '__main__':
-    main()
+    base_path = util.set_base_object_path('vpc_data')
+    print(base_path)
+    #main()
