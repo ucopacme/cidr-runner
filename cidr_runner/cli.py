@@ -15,22 +15,9 @@ from orgcrawler.cli.utils import (
     setup_crawler,
     format_responses,
 )
-
-
-def collect_vpc_data(region, account):
-    client = boto3.client('ec2', region_name=region, **account.credentials)
-    response = client.describe_vpcs()
-    #response.pop('ResponseMetadata')
-    #response['account_name'] = account.name
-    #response['account_id'] = account.id
-    #response['region'] = region
-    #return response
-    vpc_data = []
-    for vpc in response['Vpcs']:
-        vpc['AccountName'] = account.name
-        vpc['Region'] = region
-        vpc_data.append(vpc)
-    return vpc_data
+from .payloads import (
+    collect_vpc_data,
+)
 
 
 @click.command(context_settings=dict(help_option_names=['-h', '--help']))
@@ -53,7 +40,9 @@ def main(master_role, spec_file):
 
       ./cidr_runner.py -r MyIamRole -f spec.yaml | tee output.yaml
     """
-    spec = yaml.load(spec_file.read())
+
+
+    spec = yaml.safe_load(spec_file.read())
     #print(spec)
     crawler = setup_crawler(
         master_role,
