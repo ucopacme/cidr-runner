@@ -1,5 +1,7 @@
+import sys
 from datetime import datetime
 import boto3
+import yaml
 
 
 def paginate(client, method, **kwargs):
@@ -19,4 +21,14 @@ def set_base_object_path(payload_title):
     year = datetime.now().year
     return '{}/{}/{}/{}'.format(payload_title, year, month, day)
 
+
+def load_config(config_file):
+    '''
+    config_file is a open file object
+    '''
+    try:
+        config = yaml.safe_load(config_file.read())
+    except (yaml.scanner.ScannerError, UnicodeDecodeError):
+        sys.exit("{} not a valid yaml file".format(config_file.name))
+    return config
 
