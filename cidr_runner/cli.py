@@ -12,9 +12,7 @@ import click
 
 import orgcrawler
 from orgcrawler.utils import jsonfmt, yamlfmt
-from orgcrawler.cli.utils import (
-    setup_crawler,
-)
+from orgcrawler.cli.utils import setup_crawler
 import payload
 import util
 
@@ -25,7 +23,7 @@ import util
     help='IAM role to assume for accessing AWS Organization Master account.'
 )
 @click.option('--config-file', '-f',
-    default=os.path.expanduser("~/.cidr_runner/config.yaml"),
+    default=os.path.expanduser("~/.config/cidr-runner.yaml"),
     show_default=True,
     type=click.File('r'),
     help='Path to file containing account/region specifications.'
@@ -36,67 +34,32 @@ def main(master_role, config_file):
 
     Usage:
 
-      ./cidr_runner.py -r MyIamRole -f config.yaml | tee output.yaml
+      ./cli.py -r MyIamRole -f cidr-runner.yaml
     """
 
-    #print(config_file)
     config = util.load_config(config_file)
-    print(config)
     crawler = setup_crawler(
         master_role,
         accounts=config['accounts'],
         regions=config['regions'],
     )
-    #print(yamlfmt([a.dump() for a in crawler.accounts]))
+    s3_bucket = util.setup_s3_bucket(config, crawler)
+    base_obj_path = util.set_base_object_path()
 
-    execution = crawler.execute(
-        payload.vpc_data,
-    )
-    #click.echo(jsonfmt(format_responses(execution)))
-    text_stream = io.StringIO()
-    for response in execution.responses:
-        text_stream.write(jsonfmt(response.dump()) + '\n')
-    #print(text_stream.getvalue())
+    for payload_name in config['payloads']:
+        #print('runnning payload: {}'.format(payload_name))
+        obj_path = base_obj_path + '/' + payload_name + '.json'
+        print('loading object: {}'.format(obj_path))
+        f = eval('payload.' + payload_name)
+        execution = crawler.execute(f)
+        #click.echo(jsonfmt(format_responses(execution)))
+        text_stream = io.StringIO()
+        for response in execution.responses:
+            text_stream.write(jsonfmt(response.dump()) + '\n')
+        #print(text_stream.getvalue())
+        s3_bucket.put_object(Key = obj_path, Body = text_stream.getvalue())
 
-    s3 = boto3.resource('s3')
-    bucket = config['bucket_name']
-    base_path = util.set_base_object_path()
-
-    obj_path = base_path + '/' + 'vcp_data.json'
-    print(obj_path)
-
-    account = crawler.org.get_account(config['reporting_account'])
-    bucket_name = config['bucket_name'] + '-' + account.id
-    print(bucket_name)
-    s3_client = boto3.client('s3', region_name=config['reporting_region'], **account.credentials)
-    try:
-        s3_client.create_bucket(
-            ACL = 'private',
-            Bucket = bucket_name,
-            CreateBucketConfiguration = {'LocationConstraint': config['reporting_region']}
-        )
-    except s3_client.exceptions.BucketAlreadyOwnedByYou as e:
-        pass
-
-    s3_client.put_object(
-        Bucket = bucket_name,
-        Key = obj_path,
-        Body = text_stream.getvalue(),
-    )
-
-
-'''
-    try:
-        s3.Object(bucket, obj).put(Body=text_stream.getvalue())
-    except s3.meta.client.exceptions.NoSuchBucket as e:
-        boto3.client('s3').create_bucket(
-            ACL = 'private',
-            Bucket = bucket,
-            CreateBucketConfiguration = {'LocationConstraint':'us-west-2'}
-        )
-        s3.Object(bucket, obj).put(Body=text_stream.getvalue())
-
-'''
 
 if __name__ == '__main__':
     main()
+
