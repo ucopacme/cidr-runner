@@ -1,17 +1,15 @@
 #!/usr/bin/env python
 
-import io
 import os
 import sys
-
-import yaml
 import json
+
 import boto3
 from botocore.exceptions import ClientError
 import click
 
 import orgcrawler
-from orgcrawler.utils import jsonfmt, yamlfmt
+from orgcrawler.utils import jsonfmt
 from orgcrawler.cli.utils import setup_crawler
 import payload
 import util
@@ -30,8 +28,6 @@ import util
 )
 def main(master_role, config_file):
     """
-    Generate a list of AWS CIDR blocks in VPCs. Ignores default VPCs.
-
     Usage:
 
       ./cli.py -r MyIamRole -f cidr-runner.yaml
@@ -47,17 +43,20 @@ def main(master_role, config_file):
     base_obj_path = util.set_base_object_path()
 
     for payload_name in config['payloads']:
-        #print('runnning payload: {}'.format(payload_name))
-        obj_path = base_obj_path + '/' + payload_name + '.json'
-        print('loading object: {}'.format(obj_path))
+        print('runnning payload: {}'.format(payload_name))
         f = eval('payload.' + payload_name)
         execution = crawler.execute(f)
-        #click.echo(jsonfmt(format_responses(execution)))
-        text_stream = io.StringIO()
         for response in execution.responses:
-            text_stream.write(jsonfmt(response.dump()) + '\n')
-        #print(text_stream.getvalue())
-        s3_bucket.put_object(Key = obj_path, Body = text_stream.getvalue())
+            obj_path = "/".join([
+                base_obj_path,
+                response.region,
+                response.account.id,
+                payload_name + '.json'
+            ])
+            s3_bucket.put_object(
+                Key = obj_path,
+                Body = jsonfmt(response.payload_output)
+            )
 
 
 if __name__ == '__main__':
