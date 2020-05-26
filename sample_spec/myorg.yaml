@@ -7,5 +7,12 @@ accounts:
 - account01
 - account02
 - account03
-bucket_name: vpc-data-myorg
-object_path: cidrrunner
+reporting_account: test2
+reporting_region: us-west-2
+bucket_name: cidrrunner2
+payloads:
+- describe_vpcs
+- describe_subnets
+- describe_route_tables
+- describe_internet_gateways
+- describe_nat_gateways
