@@ -48,15 +48,14 @@ def main(master_role, config_file):
 
     for payload_name in config['payloads']:
         #print('runnning payload: {}'.format(payload_name))
+
         obj_path = base_obj_path + '/' + payload_name + '.json'
-        print('loading object: {}'.format(obj_path))
         f = eval('payload.' + payload_name)
         execution = crawler.execute(f)
-        #click.echo(jsonfmt(format_responses(execution)))
+
         text_stream = io.StringIO()
         for response in execution.responses:
             text_stream.write(jsonfmt(response.dump()) + '\n')
-        #print(text_stream.getvalue())
         s3_bucket.put_object(Key = obj_path, Body = text_stream.getvalue())
 
 
