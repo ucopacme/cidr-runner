@@ -43,20 +43,16 @@ def main(master_role, config_file):
     base_obj_path = util.set_base_object_path()
 
     for payload_name in config['payloads']:
-        print('runnning payload: {}'.format(payload_name))
+        #print('runnning payload: {}'.format(payload_name))
+
+        obj_path = base_obj_path + '/' + payload_name + '.json'
         f = eval('payload.' + payload_name)
         execution = crawler.execute(f)
+
+        text_stream = io.StringIO()
         for response in execution.responses:
-            obj_path = "/".join([
-                base_obj_path,
-                response.region,
-                response.account.id,
-                payload_name + '.json'
-            ])
-            s3_bucket.put_object(
-                Key = obj_path,
-                Body = jsonfmt(response.payload_output)
-            )
+            text_stream.write(jsonfmt(response.dump()) + '\n')
+        s3_bucket.put_object(Key = obj_path, Body = text_stream.getvalue())
 
 
 if __name__ == '__main__':
