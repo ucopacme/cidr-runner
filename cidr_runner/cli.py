@@ -1,17 +1,15 @@
 #!/usr/bin/env python
 
-import io
 import os
 import sys
-
-import yaml
 import json
+
 import boto3
 from botocore.exceptions import ClientError
 import click
 
 import orgcrawler
-from orgcrawler.utils import jsonfmt, yamlfmt
+from orgcrawler.utils import jsonfmt
 from orgcrawler.cli.utils import setup_crawler
 import payload
 import util
@@ -30,8 +28,6 @@ import util
 )
 def main(master_role, config_file):
     """
-    Generate a list of AWS CIDR blocks in VPCs. Ignores default VPCs.
-
     Usage:
 
       ./cli.py -r MyIamRole -f cidr-runner.yaml

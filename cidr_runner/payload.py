@@ -33,7 +33,6 @@ def describe_nat_gateways(region, account):
     return dict(NatGateways=[resource for resource in paganator])
 
 
-
 def network_data(region, account):
     '''
     The repetition within this function suggests using a loop whcih
