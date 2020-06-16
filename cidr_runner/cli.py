@@ -11,8 +11,7 @@ import click
 import orgcrawler
 from orgcrawler.utils import jsonfmt
 from orgcrawler.cli.utils import setup_crawler
-import payload
-import util
+from cidr_runner import payload, util
 
 
 @click.command(context_settings=dict(help_option_names=['-h', '--help']))
@@ -30,7 +29,7 @@ def main(master_role, config_file):
     """
     Usage:
 
-      ./cli.py -r MyIamRole -f cidr-runner.yaml
+      cidrrunner -r MyIamRole -f ~/.config/cidr-runner.yaml
     """
 
     config = util.load_config(config_file)

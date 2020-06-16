@@ -1,6 +1,6 @@
 import boto3
 
-import util
+from cidr_runner import util
 
 
 def describe_vpcs(region, account):
